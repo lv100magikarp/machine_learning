@@ -7,7 +7,7 @@ output: html_document
 
 ##  Summary
 
-In this report, I will attempt to build a model for predicting how well people do weight-lifting exercises. I will use accelerometer data collected from different body parts of 6 experiment participants. The raw data, along with more information, may be found at "http://groupware.les.inf.puc-rio.br/har". We tried out 3 different models, and the one built upon random forests was by far the most accurate.
+In this report, I will attempt to build a model for predicting how well people do weight-lifting exercises. I will use accelerometer data collected from different body parts of 6 experiment participants. The raw data, along with more information about the original research by Velloso et. al, may be found at "http://groupware.les.inf.puc-rio.br/har". We tried out 3 different models, and the one built upon random forests was by far the most accurate.
 
 ##  Load and Manipulate Data
 
