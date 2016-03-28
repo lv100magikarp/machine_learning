@@ -1,0 +1,63 @@
+---
+title: "Predicting how well people do exercises"
+author: "Zhenxun Liu"
+date: "03/27/2016"
+output: html_document
+---
+
+##  Summary
+
+In this report, I will attempt to build a model for predicting how well people do weight-lifting exercises. I will use accelerometer data collected from different body parts of 6 experiment participants. The raw data, along with more information, may be found at "http://groupware.les.inf.puc-rio.br/har". We tried out 3 different models, and the one built upon random forests was by far the most accurate.
+
+##  Load and Manipulate Data
+
+Download and read the data into R. We leave out the irrelevant data (name and time) and variables with too few entries (mostly NA/blank)
+
+```{r, cache=TRUE}
+download.file('http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv',
+              destfile = '~/traindata.csv')
+data <- read.csv('~/traindata.csv',na.strings=c('','NA'))
+
+data <- data[,-(1:7)]
+
+# variables with less than half the observations available are left out
+complete <- rep(NA,ncol(data))
+for(i in 1:ncol(data)){
+    complete[i] <- mean(complete.cases(data[,i]))>=0.5
+}
+data2 <- data[,complete]
+```
+
+##  Model Building
+
+Below is the model building process. The simplest cross-validation method leave-p-out is used. We will compare 3 different models based on the methods: random forest, linear discriminant analysis, and multinomial logistic regression. We will compare different models by their accuracy.
+
+```{r, cache=TRUE}
+set.seed(12345)
+library(caret);library(randomForest);library(MASS);library(nnet)
+
+inTrain <- createDataPartition(data2$classe,p=0.7,list=F)
+train <- data2[inTrain,]
+test <- data2[-inTrain,]
+
+MULTI <- multinom(classe~.,data=train)
+predMULTI <- predict(MULTI,test)
+confusionMatrix(predMULTI,test$classe)
+
+LDA <- train(classe~.,data=train,method='lda')
+predLDA <- predict(LDA,test)
+confusionMatrix(predLDA,test$classe)
+
+RF <- randomForest(classe~.,train)
+predRF <- predict(RF,test)
+confusionMatrix(predRF,test$classe)
+```
+
+We see that the random forest method gives a model with an amazing accuracy of over 99%. I don't believe there is any need to stack the models, as it cannot improve it much and it comes with the loss of interpretability. Hence it is rather legitimate to say that the model built upon the random forest method is our final model. We could also confidently expect the out of sample error rate be very low (judging from the 95% CI for our accuracy, it would be <1%, but let's say <3% to be safe)
+
+
+###  Citations
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+
